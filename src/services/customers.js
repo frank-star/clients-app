@@ -1,10 +1,10 @@
 import { db } from './db'
 
-const getCustomers = async ({ limit, startsWith }) => {
+const getCustomers = async ({ limit, filter, currentPage }) => {
   try {
     const response = await db.customers
-      .where('firstName')
-      .startsWith(startsWith)
+      .filter((item) => item.firstName.indexOf(filter) !== -1)
+      .offset(limit * currentPage - limit)
       .limit(limit)
       .toArray()
 
@@ -14,9 +14,11 @@ const getCustomers = async ({ limit, startsWith }) => {
   }
 }
 
-const getCustomersCount = async () => {
+const getCustomersCount = async ({ filter }) => {
   try {
-    const response = await db.customers.count()
+    const response = await db.customers
+      .filter((item) => item.firstName.indexOf(filter) !== -1)
+      .count()
 
     return response
   } catch (err) {

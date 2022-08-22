@@ -8,11 +8,7 @@ const Pagination = ({
   onPrev,
   onNext
 }) => {
-  const pages = []
-
-  for (let i = 1; i <= Math.ceil(total / perPage); i++) {
-    pages.push(i);
-  }
+  const pages = Array.from({ length: Math.ceil(total / perPage) }, (_, index) => index + 1)
 
   return (
     <div className="flex justify-center pt-6 pb-6 border-t-2 border-gray-100">
@@ -32,6 +28,7 @@ const Pagination = ({
             type="button"
             className="bg-white border-gray-300 text-gray-500 hover:bg-gray-50 relative inline-flex items-center px-4 py-2 border text-sm font-medium"
             onClick={() => onCurrent(page)}
+            disabled={currentPage === page}
           >
             {page}
           </button>

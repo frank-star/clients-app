@@ -11,6 +11,8 @@ import {
   SearchCustomer
 } from '../../components'
 
+const pageLimit = 5
+
 const Customers = () => {
   const [isVisibleModalActions, setIsVisibleModalActions] = useState(false)
   const [isVisibleModalConfirm, setIsVisibleModalConfirm] = useState(false)
@@ -20,11 +22,14 @@ const Customers = () => {
   const [fieldSearch, setFieldSearch] = useState('')
 
   const customersList = useLiveQuery(() => getCustomers({
-    limit: 5,
-    startsWith: fieldSearch
-  }), [fieldSearch]) || []
+    limit: pageLimit,
+    filter: fieldSearch,
+    currentPage
+  }), [currentPage, fieldSearch]) || []
 
-  const customersCount = useLiveQuery(() => getCustomersCount()) || 0
+  const customersCount = useLiveQuery(() => getCustomersCount({
+    filter: fieldSearch,
+  }), [fieldSearch]) || 0
 
   const handleOpenModalActions = () => {
     setIsVisibleModalActions(true)
@@ -146,13 +151,16 @@ const Customers = () => {
           </tbody>
         </table>
 
-        <Pagination
-          total={customersCount}
-          currentPage={currentPage}
-          onCurrent={handleCurrentPage}
-          onPrev={handlePrevPage}
-          onNext={handleNextPage}
-        />
+        {customersCount !== 0 && (
+          <Pagination
+            total={customersCount}
+            perPage={pageLimit}
+            currentPage={currentPage}
+            onCurrent={handleCurrentPage}
+            onPrev={handlePrevPage}
+            onNext={handleNextPage}
+          />
+        )}
       </div>
 
       <CustomerModalActions
