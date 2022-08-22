@@ -1,8 +1,15 @@
 import { useState } from 'react'
 import { useLiveQuery } from 'dexie-react-hooks'
+import { debounce } from 'lodash'
 
-import { getCustomers } from '../../services/customers'
-import { CustomerModalActions, CustomerModalConfirm, Pagination } from '../../components'
+import { getCustomers, getCustomersCount } from '../../services/customers'
+
+import {
+  CustomerModalActions,
+  CustomerModalConfirm,
+  Pagination,
+  SearchCustomer
+} from '../../components'
 
 const Customers = () => {
   const [isVisibleModalActions, setIsVisibleModalActions] = useState(false)
@@ -10,8 +17,14 @@ const Customers = () => {
   const [customerId, setCustomerId] = useState(null)
   const [customerData, setCustomerData] = useState(null)
   const [currentPage, setCurrentPage] = useState(1)
+  const [fieldSearch, setFieldSearch] = useState('')
 
-  const customersList = useLiveQuery(() => getCustomers({ limit: 5 })) || []
+  const customersList = useLiveQuery(() => getCustomers({
+    limit: 5,
+    startsWith: fieldSearch
+  }), [fieldSearch]) || []
+
+  const customersCount = useLiveQuery(() => getCustomersCount()) || 0
 
   const handleOpenModalActions = () => {
     setIsVisibleModalActions(true)
@@ -53,6 +66,10 @@ const Customers = () => {
     setCurrentPage(prev => prev + 1)
   }
 
+  const handleSearch = debounce((value) => {
+    setFieldSearch(value)
+  }, 1000)
+
   return (
     <div className="max-w-7xl mx-auto px-4">
       <div className="flex justify-between items-center border-b-2 border-gray-100 py-6">
@@ -71,6 +88,8 @@ const Customers = () => {
         </button>
       </div>
 
+      <SearchCustomer onChange={handleSearch} />
+
       <div className="mt-6 border border-gray-200 rounded-md">
         <table className="min-w-full divide-y divide-gray-200">
           <thead className="bg-gray-50">
@@ -78,6 +97,7 @@ const Customers = () => {
               <th className="px-4 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                 Id
               </th>
+
               <th className="px-4 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                 First Name
               </th>
@@ -127,7 +147,7 @@ const Customers = () => {
         </table>
 
         <Pagination
-          total={customersList.length}
+          total={customersCount}
           currentPage={currentPage}
           onCurrent={handleCurrentPage}
           onPrev={handlePrevPage}

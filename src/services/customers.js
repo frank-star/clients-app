@@ -1,10 +1,22 @@
 import { db } from './db'
 
-const getCustomers = async ({ limit }) => {
+const getCustomers = async ({ limit, startsWith }) => {
   try {
     const response = await db.customers
+      .where('firstName')
+      .startsWith(startsWith)
       .limit(limit)
       .toArray()
+
+    return response
+  } catch (err) {
+    console.error(err)
+  }
+}
+
+const getCustomersCount = async () => {
+  try {
+    const response = await db.customers.count()
 
     return response
   } catch (err) {
@@ -38,6 +50,7 @@ const deleteCustomer = async id => {
 
 export {
   getCustomers,
+  getCustomersCount,
   createCustomer,
   updateCustomer,
   deleteCustomer
